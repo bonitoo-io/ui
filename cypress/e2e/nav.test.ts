@@ -1,4 +1,3 @@
-const cy = null as any
 describe('navigation', () => {
   beforeEach(() => {
     cy.flush()
