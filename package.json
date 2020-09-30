@@ -16,6 +16,9 @@
     "src": "./src"
   },
   "scripts": {
+    "influx:setup": "cd scripts && ./influxdb2_community_test_env.sh setup-qa && cd -",
+    "influx:stop": "./scripts/influxdb2_community_test_env.sh stop",
+    "influx:clean": "./scripts/influxdb2_community_test_env.sh clean",
     "start": "yarn install && yarn generate && cross-env TS_NODE_PROJECT=\"webpack.tsconfig.json\" && yarn run build:vendor && yarn run start:dev",
     "start:cloud": "yarn install && yarn generate && cross-env TS_NODE_PROJECT=\"webpack.tsconfig.json\" && yarn run build:vendor && yarn run start:dev-cloud",
     "start:dev": "webpack-dev-server --config ./webpack.dev.ts --progress false",
