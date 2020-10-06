@@ -1,4 +1,3 @@
-FROM cypress/base:10
-RUN npm install --save-dev cypress
+FROM quay.io/influxdb/influx:nightly
 
 ENTRYPOINT ["/entrypoint.sh", "--e2e-testing=true"]
