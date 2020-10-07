@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 USE_DOCKER=1 # Docker or tarball
 USE_ALPHA=0 # alpha or nightly
 DEBUG=0
