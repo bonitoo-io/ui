@@ -137,7 +137,7 @@ jobs:
             - ~/.cache/yarn
   oss-e2e:
     docker:
-      - image: circleci/node:12
+      - image: circleci/golang:1.15-node-browsers
     steps:
       - checkout
       - init-app-dependencies
