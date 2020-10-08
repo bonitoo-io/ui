@@ -1,5 +1,23 @@
 version: 2.1
 
+commands:
+  init-app-dependencies:
+    steps:
+      - restore_cache:
+          name: Restore Yarn Package Cache
+          keys:
+            - yarn-packages-{{ checksum "app/yarn.lock" }}
+      - run:
+          name: Install Dependencies
+          command: |
+            yarn install --frozen-lockfile
+      - save_cache:
+          name: Save Yarn Package Cache
+          key: yarn-packages-{{ checksum "app/yarn.lock" }}
+          paths:
+            - ~/.cache/yarn
+
+
 jobs:
   cloud-e2e:
     machine:
@@ -105,6 +123,25 @@ jobs:
           name: "Save Yarn Package Cache"
           paths:
             - ~/.cache/yarn
+  oss-e2e:
+    docker:
+      - image: circleci/node:12
+    steps:
+      - checkout
+      - init-app-dependencies
+      - run: 
+          name: Clone and 'make' influxdb from master
+          command: |
+            yarn script db:get
+      - run:
+          name: Start influxdb
+          command: |
+            yarn script db:run
+          background: true
+      - run:
+          name: Run e2e tests
+          command: |
+            yarn test:e2e
 
 workflows:
   version: 2
