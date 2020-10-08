@@ -16,7 +16,19 @@ commands:
           key: yarn-packages-{{ checksum "yarn.lock" }}
           paths:
             - ~/.cache/yarn
-
+  install_rust_compiler:
+    description: >
+      This will install the rust compiler with the rust tools.
+    steps:
+      - run:
+          name: Install clang
+          command: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang musl-tools
+      - run:
+          name: Install rust compiler
+          command: |
+            curl https://sh.rustup.rs -sSf | \
+            sh -s -- --default-toolchain stable -y
+            echo 'source $HOME/.cargo/env' >> $BASH_ENV
 
 jobs:
   cloud-e2e:
@@ -132,6 +144,7 @@ jobs:
       - run: sudo apt-get update
       - run: sudo apt-get install -y netcat-openbsd
       - run: sudo apt-get install -y bzr
+      - install_rust_compiler
       - run: 
           name: Clone and 'make' influxdb from master
           command: |
