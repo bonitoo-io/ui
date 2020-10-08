@@ -14,4 +14,4 @@ process.stdout.write(`Cloning influxdb from ${influxGit}`)
 execSync(`git clone ${influxGit} --depth 1`, {cwd: tempDir, stdio: 'ignore'})
 
 process.stdout.write(`building influxdb`)
-execSync(`make`, {cwd: '../temp/influxdb', stdio: 'ignore'})
+execSync(`make`, {cwd: '../temp/influxdb', stdio: 'inherit'})

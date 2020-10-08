@@ -129,6 +129,9 @@ jobs:
     steps:
       - checkout
       - init-app-dependencies
+      - run: sudo apt-get update
+      - run: sudo apt-get install -y netcat-openbsd
+      - run: sudo apt-get install -y bzr
       - run: 
           name: Clone and 'make' influxdb from master
           command: |
