@@ -145,6 +145,10 @@ jobs:
       - run: sudo apt-get install -y netcat-openbsd
       - run: sudo apt-get install -y bzr
       - install_rust_compiler
+      - run:
+          name: Build UI
+          command: |
+            yarn build
       - run: 
           name: Clone and 'make' influxdb from master
           command: |
