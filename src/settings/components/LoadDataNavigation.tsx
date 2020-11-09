@@ -72,7 +72,6 @@ class LoadDataNavigation extends PureComponent<Props> {
         {tabs.map(t => {
           let tabElement = (
             <Tabs.Tab
-              testID={`${t.id}--tab`}
               key={t.id}
               text={t.text}
               id={t.id}

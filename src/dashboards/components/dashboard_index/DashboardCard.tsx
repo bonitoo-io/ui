@@ -98,7 +98,7 @@ class DashboardCard extends PureComponent<Props> {
   private get contextMenu(): JSX.Element {
     return (
       <Context>
-        <Context.Menu icon={IconFont.CogThick} testID="context-export-menu">
+        <Context.Menu icon={IconFont.CogThick}>
           <Context.Item
             label="Export"
             action={this.handleExport}

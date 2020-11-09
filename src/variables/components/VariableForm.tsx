@@ -66,7 +66,6 @@ export default class VariableForm extends PureComponent<Props, State> {
                   {status => (
                     <Input
                       placeholder="Give your variable a name"
-                      testID="variable-name-input"
                       name="name"
                       autoFocus={true}
                       value={name}
@@ -126,7 +125,6 @@ export default class VariableForm extends PureComponent<Props, State> {
                 <Button
                   text={submitText}
                   type={ButtonType.Submit}
-                  testID="variable-form-save"
                   color={ComponentColor.Success}
                   status={
                     this.isFormValid

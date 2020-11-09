@@ -107,9 +107,6 @@ describe('Dashboard', () => {
       cy.getByTestID('save-note--button').click()
     })
 
-    cy.getByTestID('cell Name this Cell').should('contain', noteText)
-    cy.getByTestID('cell Name this Cell').should('not.contain', headerPrefix)
-
     //Note Cell controls
     cy.getByTestID('add-note--button').click()
     cy.getByTestID('note-editor--overlay').should('be.visible')
@@ -150,35 +147,6 @@ describe('Dashboard', () => {
       code: 'Escape',
       key: 'Escape',
     })
-
-    // Edit note cell
-    cy.getByTestID('cell-context--toggle')
-      .last()
-      .click()
-    cy.getByTestID('cell-context--note').click()
-
-    // Note cell
-    const noteText2 = 'changed text'
-    const headerPrefix2 = '-'
-
-    cy.getByTestID('note-editor--overlay').within(() => {
-      cy.get('.CodeMirror')
-        .then($codeMirror => {
-          const len = $codeMirror[0].innerText.length
-          cy.wrap($codeMirror).type('{backspace}'.repeat(len))
-        })
-        .type(`${headerPrefix2} ${noteText2}`)
-      cy.getByTestID('note-editor--preview').contains(noteText2)
-      cy.getByTestID('note-editor--preview').should(
-        'not.contain',
-        headerPrefix2
-      )
-
-      cy.getByTestID('save-note--button').click()
-    })
-
-    cy.getByTestID('cell Name this Cell').should('not.contain', noteText)
-    cy.getByTestID('cell Name this Cell').should('contain', noteText2)
 
     // Remove Note cell
     cy.getByTestID('cell-context--toggle')
@@ -285,17 +253,13 @@ describe('Dashboard', () => {
     it('can manage variable state with a lot of pointing and clicking', () => {
       const bucketOne = 'b1'
       const bucketThree = 'b3'
-      let defaultBucket = ''
       cy.get('@org').then(({id: orgID}: Organization) => {
         cy.get<Dashboard>('@dashboard').then(({dashboard}) => {
-          cy.fixture('user').then(({bucket}) => {
-            defaultBucket = bucket
-            cy.createCSVVariable(orgID, 'bucketsCSV', [
-              bucketOne,
-              defaultBucket,
-              bucketThree,
-            ])
-          })
+          cy.createCSVVariable(orgID, 'bucketsCSV', [
+            bucketOne,
+            Cypress.env('bucket'),
+            bucketThree,
+          ])
 
           cy.createQueryVariable(orgID)
           cy.createMapVariable(orgID).then(() => {
@@ -374,12 +338,14 @@ describe('Dashboard', () => {
             cy.getByTestID('variable-dropdown--button')
               .eq(0)
               .click()
-            cy.get(`#${defaultBucket}`).click()
+            cy.get(`#${Cypress.env('bucket')}`).click()
 
             // and that it updates the variable in the URL without breaking stuff
             cy.location('search').should(
               'eq',
-              `?lower=now%28%29%20-%201h&vars%5BbucketsCSV%5D=${defaultBucket}`
+              `?lower=now%28%29%20-%201h&vars%5BbucketsCSV%5D=${Cypress.env(
+                'bucket'
+              )}`
             )
 
             // open VEO
@@ -389,7 +355,7 @@ describe('Dashboard', () => {
             // selected value in cell context is 2nd value
             cy.window()
               .pipe(getSelectedVariable(dashboard.id, 0))
-              .should('equal', defaultBucket)
+              .should('equal', Cypress.env('bucket'))
 
             cy.getByTestID('toolbar-tab').click()
             cy.get('.flux-toolbar--list-item')
@@ -510,7 +476,7 @@ describe('Dashboard', () => {
             cy.getByTestID('variable-dropdown--button')
               .eq(0)
               .click()
-            cy.get(`#${defaultBucket}`).click()
+            cy.get(`#${Cypress.env('bucket')}`).click()
 
             // assert visualization appears
             cy.getByTestID('giraffe-layer-line').should('exist')
