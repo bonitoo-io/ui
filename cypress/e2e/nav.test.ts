@@ -9,7 +9,7 @@ describe('navigation', () => {
     cy.visit('/')
   })
 
-  it('can navigate to each page', () => {
+  it('can navigate to each page from left nav', () => {
     // Load Data Page
     cy.getByTestID('nav-item-load-data').click()
     cy.getByTestID('load-data--header').should('exist')
@@ -50,16 +50,13 @@ describe('navigation', () => {
     })
 
     /**\
-
-      OSS Only Feature
-
-    // User Nav -- Members
-    cy.getByTestID('user-nav').click()
-    cy.getByTestID('user-nav-item-members').click()
-    cy.getByTestID('member-page--header').should('exist')
-    cy.url().should('contain', 'members')
-
-    \**/
+     OSS Only Feature
+     // User Nav -- Members
+     cy.getByTestID('user-nav').click()
+     cy.getByTestID('user-nav-item-members').click()
+     cy.getByTestID('member-page--header').should('exist')
+     cy.url().should('contain', 'members')
+     \**/
 
     // User Nav -- About
     cy.getByTestID('user-nav').click()
@@ -68,38 +65,99 @@ describe('navigation', () => {
     cy.url().should('contain', 'about')
 
     /**\
-
-      OSS Only Feature
-
-    // User Nav -- Switch Orgs
-    cy.getByTestID('user-nav').click()
-    cy.getByTestID('user-nav-item-switch-orgs').click()
-    cy.getByTestID('switch-overlay--header').should('exist')
-    cy.get('.cf-overlay--dismiss').click()
-
-    \**/
+     OSS Only Feature
+     // User Nav -- Switch Orgs
+     cy.getByTestID('user-nav').click()
+     cy.getByTestID('user-nav-item-switch-orgs').click()
+     cy.getByTestID('switch-overlay--header').should('exist')
+     cy.get('.cf-overlay--dismiss').click()
+     \**/
 
     /**\
-
-      OSS Only Feature
-
-    // User Nav -- Create Orgs
-    cy.getByTestID('user-nav').click()
-    cy.getByTestID('user-nav-item-create-orgs').click()
-    cy.getByTestID('create-org-overlay--header').should('exist')
-    cy.get('.cf-overlay--dismiss').click()
-
-    \**/
+     OSS Only Feature
+     // User Nav -- Create Orgs
+     cy.getByTestID('user-nav').click()
+     cy.getByTestID('user-nav-item-create-orgs').click()
+     cy.getByTestID('create-org-overlay--header').should('exist')
+     cy.get('.cf-overlay--dismiss').click()
+     \**/
 
     /**\
+     OSS Only Feature
+     // User Nav -- Log Out
+     cy.getByTestID('user-nav').click()
+     cy.getByTestID('user-nav-item-logout').click()
+     cy.getByTestID('signin-page').should('exist')
+     \**/
+  })
 
-      OSS Only Feature
+  it('can navigate in tabs of data page', () => {
+    cy.getByTestID('nav-item-load-data').click()
 
-    // User Nav -- Log Out
-    cy.getByTestID('user-nav').click()
-    cy.getByTestID('user-nav-item-logout').click()
-    cy.getByTestID('signin-page').should('exist')
+    // buckets tab
+    cy.getByTestID('tabs--tab')
+      .contains('Buckets')
+      .click()
+    cy.url().should('contain', 'buckets')
 
-    \**/
+    // telegraf tab
+    cy.getByTestID('tabs--tab')
+      .contains('Telegraf')
+      .click()
+    cy.url().should('contain', 'telegraf')
+
+    // tokens tab
+    cy.getByTestID('tabs--tab')
+      .contains('Tokens')
+      .click()
+    cy.url().should('contain', 'tokens')
+
+    // sources tab
+    cy.getByTestID('tabs--tab')
+      .contains('Sources')
+      .click()
+    cy.url().should('contain', 'sources')
+  })
+
+  const exploreTabs = (tabs: string[]) => {
+    tabs.forEach(tab => {
+      cy.getByTestID(`${tab}--tab`).click()
+      cy.url().should('contain', tab)
+    })
+  }
+
+  it('can navigate in tabs of settings page', () => {
+    cy.getByTestID('nav-item-settings').click()
+    exploreTabs(['templates', 'labels', 'variables'])
+  })
+
+  it('can navigate in tabs of collapsed alerts page', () => {
+    cy.getByTestID('nav-item-alerting').click()
+    ;['checks', 'endpoints', 'rules'].forEach(tab => {
+      cy.getByTestID(`alerting-tab--${tab}`).click()
+      cy.getByTestID(`alerting-tab--${tab}--input`).should('to.be', 'checked')
+    })
+  })
+
+  it('can navigate in tabs from maximized left tree nav', () => {
+    // TODO: check if nav is already maximized
+    cy.get('.cf-tree-nav--toggle').click()
+    ;[
+      'sources',
+      'buckets',
+      'telegrafs',
+      'tokens',
+      'history',
+      'variables',
+      'templates',
+      'labels',
+    ].forEach(x => {
+      cy.getByTestID(`nav-subitem-${x}`)
+        .last()
+        .click()
+      cy.url().should('contain', x)
+    })
+
+    cy.get('.cf-tree-nav--toggle').click()
   })
 })
