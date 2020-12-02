@@ -1,9 +1,15 @@
 // Utils
 import {get} from 'lodash'
-import {isInQuery} from 'src/variables/utils/hydrateVars'
+import {getVariableRegExp, isInQuery} from 'src/variables/utils/hydrateVars'
 
 // Types
-import {QueryViewProperties, View, ViewProperties, Variable} from 'src/types'
+import {
+  QueryViewProperties,
+  View,
+  ViewProperties,
+  Variable,
+  VariableAssignment,
+} from 'src/types'
 
 function isQueryViewProperties(vp: ViewProperties): vp is QueryViewProperties {
   return (vp as QueryViewProperties).queries !== undefined
@@ -60,6 +66,12 @@ export const filterUnusedVarsBasedOnQuery = (
 
   return getAllUsedVars(variables, varsInUse, cachedVars)
 }
+
+export const filterUnusedVisualizationVars = (
+  variables: VariableAssignment[],
+  query: string
+): VariableAssignment[] =>
+  variables.filter(variable => getVariableRegExp(variable.id.name).test(query))
 
 /*
   Given a collection variables and a collection of views, return only the

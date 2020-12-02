@@ -2,9 +2,16 @@
 import {sortBy} from 'lodash'
 
 // Utils
-import {asAssignment, getAllVariables} from 'src/variables/selectors'
+import {
+  asAssignment,
+  getAllVariables,
+  getVariableAssignmentValue,
+} from 'src/variables/selectors'
 import {buildVarsOption} from 'src/variables/utils/buildVarsOption'
-import {filterUnusedVarsBasedOnQuery} from 'src/shared/utils/filterUnusedVars'
+import {
+  filterUnusedVarsBasedOnQuery,
+  filterUnusedVisualizationVars,
+} from 'src/shared/utils/filterUnusedVars'
 import {event} from 'src/cloud/utils/reporting'
 import {getWindowVars} from 'src/variables/utils/getWindowVars'
 
@@ -152,17 +159,43 @@ export const resetQueryCacheByQuery = (query: string): void => {
 const hasWindowVars = (variables: VariableAssignment[]): boolean =>
   variables.some(vari => vari.id.name === WINDOW_PERIOD)
 
+// the visualization variables won't be shadowed by regular variables
+const filterVisualizationVars = (
+  variables: Variable[],
+  visualizationAssignment: VariableAssignment[]
+) => {
+  return variables.filter(v => {
+    return !visualizationAssignment.some(va => {
+      return v.name === va.id.name
+    })
+  })
+}
+
 export const getCachedResultsOrRunQuery = (
   orgID: string,
   query: string,
-  state: AppState
+  state: AppState,
+  visualizationVars: VariableAssignment[] = []
 ): CancelBox<RunQueryResult> => {
   const queryID = `${hashCode(query)}`
   event('Starting Query Cache Process ', {context: 'queryCache', queryID})
-  const usedVars = filterUnusedVarsBasedOnQuery(getAllVariables(state), [query])
+  const usedVars = filterUnusedVarsBasedOnQuery(
+    filterVisualizationVars(getAllVariables(state), visualizationVars),
+    [query]
+  )
   const variables = sortBy(usedVars, ['name'])
   const simplifiedVariables = variables.map(v => asSimplyKeyValueVariables(v))
-  const stringifiedVars = JSON.stringify(simplifiedVariables)
+  const filteredVisVars = filterUnusedVisualizationVars(
+    visualizationVars,
+    query
+  )
+  const simplifiedVisVars = filteredVisVars.map(assignment => ({
+    [assignment.id.name]: getVariableAssignmentValue(assignment),
+  }))
+  const stringifiedVars = JSON.stringify([
+    ...simplifiedVariables,
+    ...simplifiedVisVars,
+  ])
   // create the queryID based on the query & vars
   const hashedVariables = `${hashCode(stringifiedVars)}`
 
@@ -189,7 +222,11 @@ export const getCachedResultsOrRunQuery = (
   }
 
   // otherwise query & set results
-  const extern = buildVarsOption([...variableAssignments, ...windowVars])
+  const extern = buildVarsOption([
+    ...variableAssignments,
+    ...windowVars,
+    ...filteredVisVars,
+  ])
   const {mutex} = queryCache.initializeCacheByID(queryID, hashedVariables)
   const results = mutex.run(orgID, query, extern)
   results.promise = results.promise.then(res => {
@@ -205,8 +242,9 @@ export const getCachedResultsOrRunQuery = (
   return results
 }
 
-export const getCachedResultsThunk = (orgID: string, query: string) => (
-  _,
-  getState: GetState
-): CancelBox<RunQueryResult> =>
-  getCachedResultsOrRunQuery(orgID, query, getState())
+export const getCachedResultsThunk = (
+  orgID: string,
+  query: string,
+  visualizationVars: VariableAssignment[]
+) => (_, getState: GetState): CancelBox<RunQueryResult> =>
+  getCachedResultsOrRunQuery(orgID, query, getState(), visualizationVars)

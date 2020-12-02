@@ -54,6 +54,7 @@ import {
   Bucket,
   ResourceType,
   DashboardQuery,
+  VariableAssignment,
   AppState,
   CancelBox,
   NotificationButtonElement,
@@ -68,6 +69,8 @@ interface QueriesState {
   duration: number
   giraffeResult: FromFluxResult
   statuses: StatusRow[][]
+  onVisualizationVarsReady: (variables: VariableAssignment[]) => void
+  waitingForVisualizationVars: boolean
 }
 
 interface OwnProps {
@@ -79,6 +82,7 @@ interface OwnProps {
   implicitSubmit?: boolean
   children: (r: QueriesState) => JSX.Element
   check?: Partial<Check>
+  shouldWaitForVisualizationVars: boolean
 }
 
 type ReduxProps = ConnectedProps<typeof connector>
@@ -125,8 +129,15 @@ class TimeSeries extends Component<Props, State> {
 
   private pendingResults: Array<CancelBox<RunQueryResult>> = []
   private pendingCheckStatuses: CancelBox<StatusRow[][]> = null
+  private waitingForVisualizationVars: boolean
+  private visualizationVarsAssignment: VariableAssignment[]
 
-  public componentDidMount() {
+  constructor(props) {
+    super(props)
+    this.waitingForVisualizationVars = props.shouldWaitForVisualizationVars
+  }
+
+  private setupObserver() {
     const {cellID, setCellMount} = this.props
     this.observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
@@ -149,6 +160,14 @@ class TimeSeries extends Component<Props, State> {
     this.observer.observe(this.ref.current)
   }
 
+  public componentDidMount() {
+    if (
+      !this.props.shouldWaitForVisualizationVars ||
+      !this.waitingForVisualizationVars
+    )
+      this.setupObserver()
+  }
+
   public componentDidUpdate(prevProps: Props) {
     const {setCellMount, cellID} = this.props
     const reload = this.shouldReload(prevProps) && this.isIntersecting
@@ -164,6 +183,16 @@ class TimeSeries extends Component<Props, State> {
   public componentWillUnmount() {
     this.observer && this.observer.disconnect()
     this.pendingResults.forEach(({cancel}) => cancel())
+  }
+
+  private onVisualizationVarsReady = visualizationVarsAssignment => {
+    this.visualizationVarsAssignment = visualizationVarsAssignment
+    this.waitingForVisualizationVars = false
+    if (this.observer) {
+      this.reload()
+    } else {
+      this.setupObserver()
+    }
   }
 
   public render() {
@@ -188,12 +217,15 @@ class TimeSeries extends Component<Props, State> {
           duration,
           isInitialFetch: fetchCount === 1,
           statuses,
+          onVisualizationVarsReady: this.onVisualizationVarsReady,
+          waitingForVisualizationVars: this.waitingForVisualizationVars,
         })}
       </div>
     )
   }
 
   private reload = async () => {
+    if (this.waitingForVisualizationVars) return
     const {
       buckets,
       check,
@@ -242,10 +274,18 @@ class TimeSeries extends Component<Props, State> {
           getOrgIDFromBuckets(text, buckets) || this.props.match.params.orgID
 
         const windowVars = getWindowVars(text, vars)
-        const extern = buildVarsOption([...vars, ...windowVars])
+        const extern = buildVarsOption([
+          ...vars,
+          ...windowVars,
+          ...(this.visualizationVarsAssignment || []),
+        ])
         event('runQuery', {context: 'TimeSeries'})
         if (isCurrentPageDashboard) {
-          return onGetCachedResultsThunk(orgID, text)
+          return onGetCachedResultsThunk(
+            orgID,
+            text,
+            this.visualizationVarsAssignment
+          )
         }
         const queryID = hashCode(text)
         if (!this.hashMapMutex[queryID]) {

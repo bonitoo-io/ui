@@ -8,6 +8,7 @@ import {
 } from 'src/shared/constants'
 import {
   DEFAULT_GAUGE_COLORS,
+  DEFAULT_GEO_COLORS,
   DEFAULT_THRESHOLDS_LIST_COLORS,
   DEFAULT_THRESHOLDS_TABLE_COLORS,
 } from 'src/shared/constants/thresholds'
@@ -41,9 +42,11 @@ import {
   ViewProperties,
   ViewType,
   XYViewProperties,
+  GeoViewProperties,
   BandViewProperties,
 } from 'src/types'
 import {LineHoverDimension} from '@influxdata/giraffe/dist/types'
+import {GeoViewLayer} from '../../client'
 
 export const defaultView = (name: string = DEFAULT_CELL_NAME) => {
   return {
@@ -163,6 +166,33 @@ function defaultGaugeViewProperties() {
       isEnforced: true,
       digits: 2,
     },
+  }
+}
+
+export function defaultGeoLayer(): GeoViewLayer {
+  return {
+    type: 'circleMap',
+    radiusField: null,
+    colorField: null,
+    colorDimension: {bounds: [null, null]},
+    radiusDimension: {bounds: [null, null]},
+    colors: DEFAULT_GEO_COLORS as Color[],
+    radius: 50,
+  }
+}
+
+export function defaultGeoViewProperties(): GeoViewProperties {
+  return {
+    shape: 'chronograf-v2',
+    type: 'geo',
+    center: {lat: 0, lon: 0},
+    zoom: 1,
+    allowPanAndZoom: true,
+    detectCoordinateFields: true,
+    queries: [defaultViewQuery()],
+    layers: [defaultGeoLayer()],
+    note: '',
+    showNoteWhenEmpty: false,
   }
 }
 
@@ -436,6 +466,12 @@ const NEW_VIEW_CREATORS = {
         },
       ],
       colors: DEFAULT_LINE_COLORS as Color[],
+    },
+  }),
+  geo: (): NewView<GeoViewProperties> => ({
+    ...defaultView(),
+    properties: {
+      ...defaultGeoViewProperties(),
     },
   }),
   custom: (): NewView<TableViewProperties> => ({

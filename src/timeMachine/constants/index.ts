@@ -46,4 +46,8 @@ export const VIS_TYPES: VisType[] = [
     type: 'scatter',
     name: 'Scatter',
   },
+  {
+    type: 'geo',
+    name: 'Map',
+  },
 ]

@@ -126,6 +126,10 @@ export const getViewAndResultsForVEO = (
       })
     )
 
+    if (view.properties.type === 'geo') {
+      return new Promise(() => {})
+    }
+
     const queries = view.properties.queries.filter(({text}) => !!text.trim())
     if (!queries.length) {
       dispatch(setQueryResults(RemoteDataState.Done, [], null))

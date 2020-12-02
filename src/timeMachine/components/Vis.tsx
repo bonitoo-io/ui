@@ -24,12 +24,15 @@ import {
 } from 'src/timeMachine/selectors'
 import {isFlagEnabled} from 'src/shared/utils/featureFlag'
 import {getTimeRangeWithTimezone, getTimeZone} from 'src/dashboards/selectors'
+import {executeQueries} from '../actions/queries'
+import {setViewVariableAssignment} from './view_options/geo/geoActions'
 
 // Types
-import {RemoteDataState, AppState} from 'src/types'
+import {RemoteDataState, AppState, VariableAssignment} from 'src/types'
 
 // Selectors
 import {getActiveTimeRange} from 'src/timeMachine/selectors/index'
+import {providesVisualizationVarsAfterRender} from 'src/shared/components/views/loadingStyle'
 
 type ReduxProps = ConnectedProps<typeof connector>
 type Props = ReduxProps
@@ -51,6 +54,8 @@ const TimeMachineVis: FC<Props> = ({
   symbolColumns,
   timeZone,
   statuses,
+  onExecuteQueries,
+  onUpdateVariableAssignment,
 }) => {
   // If the current selections for `xColumn`/`yColumn`/ etc. are invalid given
   // the current Flux response, attempt to make a valid selection instead. This
@@ -70,6 +75,33 @@ const TimeMachineVis: FC<Props> = ({
   const timeMachineViewClassName = classnames('time-machine--view', {
     'time-machine--view__empty': noQueries,
   })
+
+  const onViewVariablesReady = (variableAssignment: VariableAssignment[]) => {
+    onUpdateVariableAssignment(variableAssignment)
+    onExecuteQueries()
+  }
+
+  const viewSwitcher = () => (
+    <ViewSwitcher
+      giraffeResult={giraffeResult}
+      timeRange={timeRange}
+      files={files}
+      properties={resolvedViewProperties}
+      checkType={checkType}
+      checkThresholds={checkThresholds}
+      timeZone={timeZone}
+      statuses={statuses}
+      theme="dark"
+      isInConfigurationMode={true}
+      onViewVariablesReady={onViewVariablesReady}
+    />
+  )
+  if (
+    providesVisualizationVarsAfterRender(resolvedViewProperties) &&
+    !isViewingRawData
+  ) {
+    return viewSwitcher()
+  }
 
   return (
     <div className={timeMachineViewClassName}>
@@ -106,17 +138,7 @@ const TimeMachineVis: FC<Props> = ({
               }}
             </AutoSizer>
           ) : (
-            <ViewSwitcher
-              giraffeResult={giraffeResult}
-              timeRange={timeRange}
-              files={files}
-              properties={resolvedViewProperties}
-              checkType={checkType}
-              checkThresholds={checkThresholds}
-              timeZone={timeZone}
-              statuses={statuses}
-              theme="dark"
-            />
+            viewSwitcher()
           )}
         </EmptyQueryView>
       </ErrorBoundary>
@@ -169,6 +191,11 @@ const mstp = (state: AppState) => {
   }
 }
 
-const connector = connect(mstp)
+const mdtp = {
+  onExecuteQueries: () => dispatch => dispatch(executeQueries()),
+  onUpdateVariableAssignment: setViewVariableAssignment,
+}
+
+const connector = connect(mstp, mdtp)
 
 export default connector(TimeMachineVis)

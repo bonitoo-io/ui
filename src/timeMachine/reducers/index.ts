@@ -5,6 +5,8 @@ import {produce} from 'immer'
 // Utils
 import {createView, defaultViewQuery} from 'src/views/helpers'
 import {isConfigValid, buildQuery} from 'src/timeMachine/utils/queryBuilder'
+import {geoTimeMachineReducer} from 'src/timeMachine/components/view_options/geo/geoReducers'
+import {isGeoAction} from 'src/timeMachine/components/view_options/geo/geoActions'
 
 // Constants
 import {AUTOREFRESH_DEFAULT} from 'src/shared/constants'
@@ -36,6 +38,8 @@ import {
   RemoteDataState,
   TimeMachineID,
   Color,
+  ColoredViewProperties,
+  VariableAssignment,
 } from 'src/types'
 import {Action} from 'src/timeMachine/actions'
 import {TimeMachineTab} from 'src/types/timeMachine'
@@ -78,6 +82,7 @@ export interface TimeMachineState {
   queryBuilder: QueryBuilderState
   queryResults: QueryResultsState
   contextID?: string | null
+  viewVariablesAssignment?: VariableAssignment[]
 }
 
 export interface TimeMachinesState {
@@ -651,7 +656,8 @@ export const timeMachineReducer = (
     }
 
     case 'SET_BACKGROUND_THRESHOLD_COLORING': {
-      const viewColors = state.view.properties.colors as Color[]
+      const viewColors = (state.view.properties as ColoredViewProperties)
+        .colors as Color[]
 
       const colors = viewColors.map(color => {
         if (color.type !== 'scale') {
@@ -668,7 +674,8 @@ export const timeMachineReducer = (
     }
 
     case 'SET_TEXT_THRESHOLD_COLORING': {
-      const viewColors = state.view.properties.colors as Color[]
+      const viewColors = (state.view.properties as ColoredViewProperties)
+        .colors as Color[]
 
       const colors = viewColors.map(color => {
         if (color.type !== 'scale') {
@@ -1077,6 +1084,7 @@ export const timeMachineReducer = (
     }
   }
 
+  if (isGeoAction(action)) return geoTimeMachineReducer(state, action)
   return state
 }
 

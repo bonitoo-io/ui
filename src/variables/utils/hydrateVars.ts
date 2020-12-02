@@ -75,11 +75,12 @@ export const createVariableGraph = (
   return Object.values(nodesByID)
 }
 
-export const isInQuery = (query: string, v: Variable): boolean => {
-  const regexp = new RegExp(
-    `${BOUNDARY_GROUP}${OPTION_NAME}.${v.name}${BOUNDARY_GROUP}`
-  )
+export const getVariableRegExp = (name: string) => {
+  return new RegExp(`${BOUNDARY_GROUP}${OPTION_NAME}.${name}${BOUNDARY_GROUP}`)
+}
 
+export const isInQuery = (query: string, v: Variable): boolean => {
+  const regexp = getVariableRegExp(v.name)
   return regexp.test(query)
 }
 

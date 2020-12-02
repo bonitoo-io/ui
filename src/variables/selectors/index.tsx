@@ -2,7 +2,7 @@
 import {get} from 'lodash'
 
 // Utils
-import {getActiveQuery} from 'src/timeMachine/selectors'
+import {getActiveQuery, getActiveTimeMachine} from 'src/timeMachine/selectors'
 import {getRangeVariable} from 'src/variables/utils/getTimeRangeVars'
 import {getTimeRange, getTimeRangeWithTimezone} from 'src/dashboards/selectors'
 import {getWindowPeriodVariable} from 'src/variables/utils/getWindowVars'
@@ -12,16 +12,24 @@ import {
   WINDOW_PERIOD,
 } from 'src/variables/constants'
 import {currentContext} from 'src/shared/selectors/currentContext'
+import produce from 'immer'
+import {TimeMachineState} from 'src/timeMachine/reducers'
+import {
+  GEO_VARIABLE_NAMES,
+  GEO_VISUALIZATION_VARIABLES,
+} from 'src/shared/components/geo/geoVisualizationVars'
 
 // Types
 import {
-  RemoteDataState,
+  AppState,
+  CSVArguments,
   MapArguments,
   QueryArguments,
-  CSVArguments,
+  RemoteDataState,
+  Variable,
+  VariableArgumentType,
 } from 'src/types'
 import {VariableAssignment} from 'src/types/ast'
-import {AppState, VariableArgumentType, Variable} from 'src/types'
 
 export const extractVariableEditorName = (state: AppState): string => {
   return state.variableEditor.name
@@ -98,6 +106,21 @@ export const getVariables = (
   return vars
 }
 
+const getVisualizationVariablesIDs = (state: AppState): string[] => {
+  const timeMachine = getActiveTimeMachine(state)
+  const type = timeMachine.view.properties.type
+  switch (type) {
+    case 'geo':
+      return GEO_VARIABLE_NAMES
+    default:
+      return []
+  }
+}
+
+const VISUALIZATION_VARIABLES = {
+  ...GEO_VISUALIZATION_VARIABLES,
+}
+
 // the same as the above method, but includes system
 // variables
 export const getAllVariables = (
@@ -106,12 +129,42 @@ export const getAllVariables = (
 ): Variable[] => {
   const vars = getUserVariableNames(state, contextID || currentContext(state))
     .concat([TIME_RANGE_START, TIME_RANGE_STOP, WINDOW_PERIOD])
+    .concat(getVisualizationVariablesIDs(state))
     .reduce((prev, curr) => {
       prev.push(getVariable(state, curr))
       return prev
     }, [])
     .filter(v => !!v)
   return vars
+}
+
+export const getVariableAssignmentValue = (
+  assignment: VariableAssignment
+): any => {
+  switch (assignment.init.type) {
+    case 'FloatLiteral':
+    case 'IntegerLiteral':
+    case 'StringLiteral':
+      return assignment.init.value
+    default:
+      return null
+  }
+}
+
+const getStateVisVariableValue = (
+  timeMachineState: TimeMachineState,
+  variableID: string
+) => {
+  const {viewVariablesAssignment} = timeMachineState
+  if (viewVariablesAssignment) {
+    const assignment = viewVariablesAssignment.find(
+      assignment => assignment.id.name === variableID
+    )
+    if (assignment) {
+      return getVariableAssignmentValue(assignment)
+    }
+  }
+  return null
 }
 
 export const sortVariablesByName = (variables: Variable[]): Variable[] =>
@@ -151,6 +204,15 @@ export const getVariable = (state: AppState, variableID: string): Variable => {
     }, timeVars)
 
     vari = (getWindowPeriodVariable(text, assignments) || [])[0]
+  }
+
+  if (!vari && VISUALIZATION_VARIABLES[variableID]) {
+    vari = produce(VISUALIZATION_VARIABLES[variableID], draft => {
+      draft.arguments.values = getStateVisVariableValue(
+        getActiveTimeMachine(state),
+        VISUALIZATION_VARIABLES[variableID].name
+      )
+    })
   }
 
   if (!vari) {
@@ -203,6 +265,22 @@ export const asAssignment = (variable: Variable): VariableAssignment => {
       name: variable.name,
     },
   } as VariableAssignment
+
+  if (variable.arguments.type === 'system') {
+    const value = variable.arguments.values
+    if (typeof value === 'number') {
+      out.init = {
+        type: 'FloatLiteral',
+        value,
+      }
+    }
+    if (typeof value === 'string') {
+      out.init = {
+        type: 'StringLiteral',
+        value,
+      }
+    }
+  }
 
   if (variable.id === WINDOW_PERIOD) {
     out.init = {
@@ -276,6 +354,7 @@ export const asAssignment = (variable: Variable): VariableAssignment => {
       }
     }
   }
+  if (!out.init) return null
 
   return out
 }

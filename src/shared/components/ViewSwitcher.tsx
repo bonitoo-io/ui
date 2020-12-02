@@ -15,6 +15,7 @@ import ScatterPlot from 'src/shared/components/ScatterPlot'
 import LatestValueTransform from 'src/shared/components/LatestValueTransform'
 import CheckPlot from 'src/shared/components/CheckPlot'
 import BandPlot from 'src/shared/components/BandPlot'
+import GeoChart from 'src/shared/components/geo/GeoChart'
 
 // Types
 import {
@@ -29,6 +30,7 @@ import {
   Threshold,
   Theme,
 } from 'src/types'
+import {VariableAssignment} from '../../types'
 
 interface Props {
   giraffeResult: FromFluxResult
@@ -40,6 +42,8 @@ interface Props {
   checkType?: CheckType
   checkThresholds?: Threshold[]
   theme: Theme
+  isInConfigurationMode?: boolean
+  onViewVariablesReady?: (variables: VariableAssignment[]) => void
 }
 
 const ViewSwitcher: FunctionComponent<Props> = ({
@@ -52,6 +56,8 @@ const ViewSwitcher: FunctionComponent<Props> = ({
   checkType = null,
   checkThresholds = [],
   theme,
+  isInConfigurationMode,
+  onViewVariablesReady,
 }) => {
   switch (properties.type) {
     case 'single-stat':
@@ -229,6 +235,19 @@ const ViewSwitcher: FunctionComponent<Props> = ({
         >
           {config => <Plot config={config} />}
         </CheckPlot>
+      )
+
+    case 'geo':
+      return (
+        <GeoChart
+          table={table}
+          properties={properties}
+          theme={theme}
+          isInConfigurationMode={isInConfigurationMode}
+          onViewVariablesReady={onViewVariablesReady}
+        >
+          {config => <Plot config={config} />}
+        </GeoChart>
       )
 
     default:
