@@ -25,7 +25,7 @@ import {
 import {isFlagEnabled} from 'src/shared/utils/featureFlag'
 import {getTimeRangeWithTimezone, getTimeZone} from 'src/dashboards/selectors'
 import {executeQueries} from '../actions/queries'
-import {setViewVariableAssignment} from './view_options/geo/geoActions'
+import {setViewVariableAssignment} from 'src/shared/visualization/types/Geo/options/geoActions'
 
 // Types
 import {RemoteDataState, AppState, VariableAssignment} from 'src/types'

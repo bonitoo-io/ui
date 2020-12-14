@@ -5,8 +5,8 @@ import {Form, Grid, Input, InputType} from '@influxdata/clockface'
 
 // Components
 import ThresholdsSettings from 'src/shared/components/ThresholdsSettings'
-import DimensionValueDisplayProperties from 'src/shared/components/geo/DimensionValueDisplayProperties'
-import FieldSelector from 'src/timeMachine/components/view_options/geo/GeoFieldSelector'
+import DimensionValueDisplayProperties from 'src/shared/visualization/types/Geo/rendering/DimensionValueDisplayProperties'
+import FieldSelector from 'src/shared/visualization/types/Geo/options/GeoFieldSelector'
 import Checkbox from 'src/shared/components/Checkbox'
 import AutoDomainInput from 'src/shared/components/AutoDomainInput'
 
@@ -16,7 +16,7 @@ import {
   setField,
   setLayerColors,
   setRadius,
-} from 'src/timeMachine/components/view_options/geo/geoActions'
+} from 'src/shared/visualization/types/Geo/options/geoActions'
 
 // Types
 import {Color} from 'src/types/colors'
@@ -24,7 +24,7 @@ import {Axis, GeoCircleViewLayer} from 'src/client'
 
 // Utils
 import {parseYBounds as parseBounds} from 'src/shared/utils/vis'
-import {nameOf} from 'src/shared/components/geo/utils'
+import {nameOf} from 'src/shared/visualization/types/Geo/rendering/utils'
 
 const MIN_CIRCLE_RADIUS = 1
 const MAX_CIRCLE_RADIUS = 100

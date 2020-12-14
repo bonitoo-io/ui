@@ -1,5 +1,5 @@
 import icon from './icon'
-import GeoOptions from '../../../../timeMachine/components/view_options/GeoOptions'
+import GeoOptions from 'src/shared/visualization/types/Geo/options/GeoOptions'
 import {defaultGeoViewProperties} from '../../../../views/helpers'
 
 export default register => {

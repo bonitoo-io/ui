@@ -39,7 +39,7 @@ import {
 } from 'src/types'
 import {Color} from 'src/types/colors'
 import {HistogramPosition, LinePosition} from '@influxdata/giraffe'
-import {GeoChartAction} from 'src/timeMachine/components/view_options/geo/geoActions'
+import {GeoChartAction} from 'src/shared/visualization/types/Geo/options/geoActions'
 
 export type Action =
   | QueryBuilderAction

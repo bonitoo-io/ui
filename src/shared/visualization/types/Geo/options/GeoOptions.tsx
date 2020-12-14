@@ -31,12 +31,12 @@ import {
 } from 'src/client'
 
 // Components
-import {ButtonCollapsible} from 'src/timeMachine/components/view_options/geo/ButtonCollapsible'
+import {ButtonCollapsible} from 'src/shared/visualization/types/Geo/options/ButtonCollapsible'
 import Checkbox from 'src/shared/components/Checkbox'
-import GeoCircleLayerOptions from 'src/timeMachine/components/view_options/geo/GeoCircleLayerOptions'
-import GeoHeatmapLayerOptions from 'src/timeMachine/components/view_options/geo/GeoHeatmapLayerOptions'
-import GeoPointMapLayerOptions from 'src/timeMachine/components/view_options/geo/GeoPointMapLayerOptions'
-import GeoTrackMapLayerOptions from 'src/timeMachine/components/view_options/geo/GeoTrackMapLayerOptions'
+import GeoCircleLayerOptions from 'src/shared/visualization/types/Geo/options/GeoCircleLayerOptions'
+import GeoHeatmapLayerOptions from 'src/shared/visualization/types/Geo/options/GeoHeatmapLayerOptions'
+import GeoPointMapLayerOptions from 'src/shared/visualization/types/Geo/options/GeoPointMapLayerOptions'
+import GeoTrackMapLayerOptions from 'src/shared/visualization/types/Geo/options/GeoTrackMapLayerOptions'
 
 // Actions
 import {
@@ -49,13 +49,13 @@ import {
   addGeoLayer,
   removeGeoLayer,
   setMapStyle,
-} from 'src/timeMachine/components/view_options/geo/geoActions'
+} from 'src/shared/visualization/types/Geo/options/geoActions'
 
 // Utils
 import {getVisTable} from 'src/timeMachine/selectors'
-import {nameOf} from 'src/shared/components/geo/utils'
+import {nameOf} from 'src/shared/visualization/types/Geo/rendering/utils'
 import {defaultGeoLayer} from 'src/views/helpers'
-import {getColumnNames} from 'src/timeMachine/components/view_options/geo/tableProcessing'
+import {getColumnNames} from 'src/shared/visualization/types/Geo/options/tableProcessing'
 
 const MIN_ZOOM_FACTOR = 0
 const MAX_ZOOM_FACTOR = 28

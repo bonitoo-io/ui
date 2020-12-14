@@ -15,7 +15,7 @@ import ScatterPlot from 'src/shared/components/ScatterPlot'
 import LatestValueTransform from 'src/shared/components/LatestValueTransform'
 import CheckPlot from 'src/shared/components/CheckPlot'
 import BandPlot from 'src/shared/components/BandPlot'
-import GeoChart from 'src/shared/components/geo/GeoChart'
+import GeoChart from 'src/shared/visualization/types/Geo/rendering/GeoChart'
 
 // Types
 import {

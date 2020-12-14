@@ -15,12 +15,12 @@ import {ErrorHandling} from 'src/shared/decorators/errors'
 import {
   setViewport,
   setViewVariableAssignment,
-} from 'src/timeMachine/components/view_options/geo/geoActions'
+} from 'src/shared/visualization/types/Geo/options/geoActions'
 import {
   getTileServerConfigurations,
   loadTileServerSecret,
   TileServerConfigurations,
-} from 'src/shared/components/geo/tileServer'
+} from 'src/shared/visualization/types/Geo/rendering/tileServer'
 import {getOrg} from 'src/organizations/selectors'
 import {calculateVariableAssignment} from './geoVisualizationVars'
 

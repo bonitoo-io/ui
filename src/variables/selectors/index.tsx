@@ -17,7 +17,7 @@ import {TimeMachineState} from 'src/timeMachine/reducers'
 import {
   GEO_VARIABLE_NAMES,
   GEO_VISUALIZATION_VARIABLES,
-} from 'src/shared/components/geo/geoVisualizationVars'
+} from 'src/shared/visualization/types/Geo/rendering/geoVisualizationVars'
 
 // Types
 import {

@@ -4,7 +4,7 @@ import {connect} from 'react-redux'
 import {Form, Input, InputType} from '@influxdata/clockface'
 
 // Components
-import FieldSelector from 'src/timeMachine/components/view_options/geo/GeoFieldSelector'
+import FieldSelector from 'src/shared/visualization/types/Geo/options/GeoFieldSelector'
 import ColorSchemeDropdown from 'src/shared/components/ColorSchemeDropdown'
 import AutoDomainInput from 'src/shared/components/AutoDomainInput'
 
@@ -14,14 +14,14 @@ import {
   setField,
   setLayerColors,
   setRadius,
-} from 'src/timeMachine/components/view_options/geo/geoActions'
+} from 'src/shared/visualization/types/Geo/options/geoActions'
 
 // Types
 import {Color} from 'src/types'
 import {Axis, GeoHeatMapViewLayer} from 'src/client'
 
 // Utils
-import {nameOf} from 'src/shared/components/geo/utils'
+import {nameOf} from 'src/shared/visualization/types/Geo/rendering/utils'
 import {parseYBounds as parseBounds} from 'src/shared/utils/vis'
 
 const MIN_CIRCLE_RADIUS = 1

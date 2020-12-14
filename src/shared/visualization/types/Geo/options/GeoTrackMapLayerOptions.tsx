@@ -10,7 +10,7 @@ import ColorSchemeDropdown from 'src/shared/components/ColorSchemeDropdown'
 import {
   setField,
   setLayerColors,
-} from 'src/timeMachine/components/view_options/geo/geoActions'
+} from 'src/shared/visualization/types/Geo/options/geoActions'
 
 // Types
 import {Color} from 'src/types'
@@ -18,7 +18,7 @@ import {GeoTrackMapViewLayer} from 'src/client'
 
 // Utils
 import Checkbox from 'src/shared/components/Checkbox'
-import {nameOf} from 'src/shared/components/geo/utils'
+import {nameOf} from 'src/shared/visualization/types/Geo/rendering/utils'
 
 interface OwnProps {
   id: number

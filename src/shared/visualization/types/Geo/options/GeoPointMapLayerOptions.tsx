@@ -4,9 +4,9 @@ import {connect} from 'react-redux'
 import {Form, Grid} from '@influxdata/clockface'
 
 // Components
-import FieldSelector from 'src/timeMachine/components/view_options/geo/GeoFieldSelector'
+import FieldSelector from 'src/shared/visualization/types/Geo/options/GeoFieldSelector'
 import ThresholdsSettings from 'src/shared/components/ThresholdsSettings'
-import DimensionValueDisplayProperties from 'src/shared/components/geo/DimensionValueDisplayProperties'
+import DimensionValueDisplayProperties from 'src/shared/visualization/types/Geo/rendering/DimensionValueDisplayProperties'
 import Checkbox from 'src/shared/components/Checkbox'
 
 // Actions
@@ -14,13 +14,13 @@ import {
   setDimensionProperty,
   setField,
   setLayerColors,
-} from 'src/timeMachine/components/view_options/geo/geoActions'
+} from 'src/shared/visualization/types/Geo/options/geoActions'
 
 // Types
 import {GeoPointMapViewLayer} from 'src/client'
 
 // Utils
-import {nameOf} from 'src/shared/components/geo/utils'
+import {nameOf} from 'src/shared/visualization/types/Geo/rendering/utils'
 import {Color} from 'src/types'
 
 interface OwnProps {

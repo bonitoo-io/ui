@@ -5,8 +5,8 @@ import {produce} from 'immer'
 // Utils
 import {createView, defaultViewQuery} from 'src/views/helpers'
 import {isConfigValid, buildQuery} from 'src/timeMachine/utils/queryBuilder'
-import {geoTimeMachineReducer} from 'src/timeMachine/components/view_options/geo/geoReducers'
-import {isGeoAction} from 'src/timeMachine/components/view_options/geo/geoActions'
+import {geoTimeMachineReducer} from 'src/shared/visualization/types/Geo/options/geoReducers'
+import {isGeoAction} from 'src/shared/visualization/types/Geo/options/geoActions'
 
 // Constants
 import {AUTOREFRESH_DEFAULT} from 'src/shared/constants'

@@ -68,13 +68,6 @@ export const geoTimeMachineReducer = (
         view.properties.detectCoordinateFields = detectCoordinateFields
       })
     }
-    case 'SET_LONGITUDE': {
-      const {lon} = action.payload
-      return produce(state, draftState => {
-        const view = draftState.view as ExtractWorkingView<WithCenterLocation>
-        view.properties.center.lon = lon
-      })
-    }
     case 'SET_VIEWPORT': {
       const {lon, lat, zoom} = action.payload
       return produce(state, draftState => {
