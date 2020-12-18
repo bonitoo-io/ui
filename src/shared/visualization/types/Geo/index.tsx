@@ -8,7 +8,7 @@ export default register => {
     name: 'Map',
     graphic: icon,
     initial: defaultGeoViewProperties(),
-    // featureFlag: 'geoVisualizationType',
+    featureFlag: 'geoWidget',
     options: GeoOptions,
   })
 }
