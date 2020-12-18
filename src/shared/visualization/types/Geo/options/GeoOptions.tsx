@@ -1,5 +1,5 @@
 // Libraries
-import React, {PureComponent} from 'react'
+import React, {FunctionComponent} from 'react'
 import {connect} from 'react-redux'
 import {invert} from 'lodash'
 import {
@@ -98,10 +98,21 @@ const MAP_STYLES = {
   Dark: 'dark',
 }
 
-class GeoOptions extends PureComponent<Props> {
-  public renderLayer(id: number, layer: GeoViewLayer) {
+export const GeoOptions: FunctionComponent<Props> = props => {
+  const {
+    layers,
+    allowPanAndZoom,
+    mapStyle,
+    onUpdateAllowPanAndZoom,
+    onAddLayer,
+    onRemoveLayer,
+    detectCoordinateFields,
+    onUpdateDetectCoordinateFields,
+  } = props
+
+  const renderLayer = (id: number, layer: GeoViewLayer) => {
     const type = invert(VISUALIZATION_TYPES)[layer.type]
-    const {columns} = this.props
+    const {columns} = props
     return (
       <>
         <Form.Element label="Visualization type">
@@ -109,7 +120,7 @@ class GeoOptions extends PureComponent<Props> {
             options={Object.keys(VISUALIZATION_TYPES)}
             selectedOption={type || 'Circle map'}
             onSelect={value => {
-              this.props.onUpdateLayerType(value, id)
+              props.onUpdateLayerType(value, id)
             }}
           />
         </Form.Element>
@@ -149,153 +160,140 @@ class GeoOptions extends PureComponent<Props> {
     )
   }
 
-  public render() {
-    const {props} = this
-    const {
-      layers,
-      allowPanAndZoom,
-      mapStyle,
-      onUpdateAllowPanAndZoom,
-      onAddLayer,
-      onRemoveLayer,
-      detectCoordinateFields,
-      onUpdateDetectCoordinateFields,
-    } = props
-    return (
-      <>
-        <Grid.Column className={'geo-options'}>
-          <h4 className="view-options--header">Customize Geo Chart</h4>
-          <Grid.Column className={'data grouping checkbox'}>
-            <Checkbox
-              label={
-                <span>
-                  Search results for coordinates and fields.{' '}
-                  <a
-                    href={
-                      'https://docs.influxdata.com/chronograf/latest/guides/geo-widget#automatic-pivoting'
-                    }
-                    target={'_blank'}
-                  >
-                    More...
-                  </a>
-                </span>
-              }
-              checked={detectCoordinateFields}
-              onSetChecked={onUpdateDetectCoordinateFields}
-            />
-          </Grid.Column>
-          <Grid.Column className={'movement checkbox'}>
-            <Checkbox
-              label="Allow pan and zoom"
-              checked={allowPanAndZoom}
-              onSetChecked={onUpdateAllowPanAndZoom}
-            />
-          </Grid.Column>
-          <ButtonCollapsible
-            className={'locationButton'}
-            passiveText={'SET LOCATION'}
-            activeText={'HIDE'}
-            sectionTitle={'Location'}
-            contents={
-              <>
-                <FlexBox
-                  direction={FlexDirection.Row}
-                  alignItems={AlignItems.Center}
-                  margin={ComponentSize.Small}
-                  testID={'geo-location'}
+  return (
+    <>
+      <Grid.Column className={'geo-options'}>
+        <h4 className="view-options--header">Customize Geo Chart</h4>
+        <Grid.Column className={'data grouping checkbox'}>
+          <Checkbox
+            label={
+              <span>
+                Search results for coordinates and fields.{' '}
+                <a
+                  href={
+                    'https://docs.influxdata.com/chronograf/latest/guides/geo-widget#automatic-pivoting'
+                  }
+                  target={'_blank'}
                 >
-                  <Form.Element label="Latitude">
-                    <Input
-                      style={{flex: '1 0 0'}}
-                      testID={`geo-lat-input`}
-                      value={props.center.lat}
-                      placeholder="Latitude"
-                      min={MIN_LATITUDE}
-                      max={MAX_LATITUDE}
-                      type={InputType.Number}
-                      onChange={e => {
-                        props.onUpdateLat(Number(e.target.value))
-                      }}
-                    />
-                  </Form.Element>
-                  <Form.Element label="Longitude">
-                    <Input
-                      style={{flex: '1 0 0'}}
-                      testID={`geo-lon-input`}
-                      value={props.center.lon}
-                      placeholder="Longitude"
-                      min={MIN_LONGITUDE}
-                      max={MAX_LONGITUDE}
-                      type={InputType.Number}
-                      onChange={e => props.onUpdateLon(Number(e.target.value))}
-                    />
-                  </Form.Element>
-                  <Form.Element label="Zoom level">
-                    <Input
-                      style={{flex: '1 0 0'}}
-                      testID={`geo-zoom-input`}
-                      value={props.zoom}
-                      placeholder="Zoom Factor 0-28"
-                      min={MIN_ZOOM_FACTOR}
-                      max={MAX_ZOOM_FACTOR}
-                      type={InputType.Number}
-                      onChange={e => props.onUpdateZoom(Number(e.target.value))}
-                    />
-                  </Form.Element>
-                </FlexBox>
-              </>
+                  More...
+                </a>
+              </span>
             }
+            checked={detectCoordinateFields}
+            onSetChecked={onUpdateDetectCoordinateFields}
           />
-          <Form.Element className={'mapStyle'} label="Map Graphics">
-            <SelectDropdown
-              options={Object.keys(MAP_STYLES)}
-              selectedOption={mapStyle || 'Roads'}
-              onSelect={style => {
-                this.props.onUpdateMapStyle(style)
+        </Grid.Column>
+        <Grid.Column className={'movement checkbox'}>
+          <Checkbox
+            label="Allow pan and zoom"
+            checked={allowPanAndZoom}
+            onSetChecked={onUpdateAllowPanAndZoom}
+          />
+        </Grid.Column>
+        <ButtonCollapsible
+          className={'locationButton'}
+          passiveText={'SET LOCATION'}
+          activeText={'HIDE'}
+          sectionTitle={'Location'}
+          contents={
+            <>
+              <FlexBox
+                direction={FlexDirection.Row}
+                alignItems={AlignItems.Center}
+                margin={ComponentSize.Small}
+                testID={'geo-location'}
+              >
+                <Form.Element label="Latitude">
+                  <Input
+                    style={{flex: '1 0 0'}}
+                    testID={`geo-lat-input`}
+                    value={props.center.lat}
+                    placeholder="Latitude"
+                    min={MIN_LATITUDE}
+                    max={MAX_LATITUDE}
+                    type={InputType.Number}
+                    onChange={e => {
+                      props.onUpdateLat(Number(e.target.value))
+                    }}
+                  />
+                </Form.Element>
+                <Form.Element label="Longitude">
+                  <Input
+                    style={{flex: '1 0 0'}}
+                    testID={`geo-lon-input`}
+                    value={props.center.lon}
+                    placeholder="Longitude"
+                    min={MIN_LONGITUDE}
+                    max={MAX_LONGITUDE}
+                    type={InputType.Number}
+                    onChange={e => props.onUpdateLon(Number(e.target.value))}
+                  />
+                </Form.Element>
+                <Form.Element label="Zoom level">
+                  <Input
+                    style={{flex: '1 0 0'}}
+                    testID={`geo-zoom-input`}
+                    value={props.zoom}
+                    placeholder="Zoom Factor 0-28"
+                    min={MIN_ZOOM_FACTOR}
+                    max={MAX_ZOOM_FACTOR}
+                    type={InputType.Number}
+                    onChange={e => props.onUpdateZoom(Number(e.target.value))}
+                  />
+                </Form.Element>
+              </FlexBox>
+            </>
+          }
+        />
+        <Form.Element className={'mapStyle'} label="Map Graphics">
+          <SelectDropdown
+            options={Object.keys(MAP_STYLES)}
+            selectedOption={mapStyle || 'Roads'}
+            onSelect={style => {
+              props.onUpdateMapStyle(style)
+            }}
+          />
+        </Form.Element>
+        {layers.map((layer, id) => {
+          return (
+            <div key={id}>
+              <h4>
+                {id === 0 && 'Top Layer'}
+                {layers.length > 1 &&
+                  id === layers.length - 1 &&
+                  'Bottom Layer'}
+                {layers.length > 1 && (
+                  <Button
+                    className={'removeLayerButton'}
+                    shape={ButtonShape.Default}
+                    text={'Remove'}
+                    onClick={() => {
+                      onRemoveLayer(id)
+                    }}
+                  />
+                )}
+              </h4>
+              {renderLayer(id, layer)}
+            </div>
+          )
+        })}
+
+        {layers.length < 2 && (
+          <Grid.Column className={'settings'}>
+            <Button
+              icon={IconFont.Plus}
+              shape={ButtonShape.Default}
+              text="Add another layer"
+              color={ComponentColor.Primary}
+              onClick={() => {
+                onAddLayer(defaultGeoLayer())
               }}
             />
-          </Form.Element>
-          {layers.map((layer, id) => {
-            return (
-              <div key={id}>
-                <h4>
-                  {id === 0 && 'Top Layer'}
-                  {layers.length > 1 &&
-                    id === layers.length - 1 &&
-                    'Bottom Layer'}
-                  {layers.length > 1 && (
-                    <Button
-                      className={'removeLayerButton'}
-                      shape={ButtonShape.Default}
-                      text={'Remove'}
-                      onClick={() => {
-                        onRemoveLayer(id)
-                      }}
-                    />
-                  )}
-                </h4>
-                {this.renderLayer(id, layer)}
-              </div>
-            )
-          })}
-
-          {layers.length < 2 && (
-            <Grid.Column className={'settings'}>
-              <Button
-                icon={IconFont.Plus}
-                shape={ButtonShape.Default}
-                text="Add another layer"
-                color={ComponentColor.Primary}
-                onClick={() => {
-                  onAddLayer(defaultGeoLayer())
-                }}
-              />
-            </Grid.Column>
-          )}
-        </Grid.Column>
-      </>
-    )
-  }
+          </Grid.Column>
+        )}
+      </Grid.Column>
+    </>
+  )
 }
 
 const mapDispatchToProps: DispatchProps = {
@@ -308,12 +306,6 @@ const mapDispatchToProps: DispatchProps = {
   onAddLayer: addGeoLayer,
   onRemoveLayer: removeGeoLayer,
   onUpdateLayerType(type: string, layer: number) {
-    console.log(
-      VISUALIZATION_TYPES[type],
-      type,
-      nameOf<GeoViewLayer>('type'),
-      layer
-    )
     return setField(
       nameOf<GeoViewLayerProperties>('type'),
       VISUALIZATION_TYPES[type],

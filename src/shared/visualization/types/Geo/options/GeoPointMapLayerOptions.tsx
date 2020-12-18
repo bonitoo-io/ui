@@ -1,12 +1,12 @@
 // Libraries
-import React, {PureComponent} from 'react'
+import React, {FunctionComponent} from 'react'
 import {connect} from 'react-redux'
 import {Form, Grid} from '@influxdata/clockface'
 
 // Components
 import FieldSelector from 'src/shared/visualization/types/Geo/options/GeoFieldSelector'
 import ThresholdsSettings from 'src/shared/components/ThresholdsSettings'
-import DimensionValueDisplayProperties from 'src/shared/visualization/types/Geo/rendering/DimensionValueDisplayProperties'
+import DimensionValueDisplayProperties from 'src/shared/visualization/types/Geo/options/DimensionValueDisplayProperties'
 import Checkbox from 'src/shared/components/Checkbox'
 
 // Actions
@@ -46,66 +46,62 @@ interface DispatchProps {
 
 type Props = OwnProps & DispatchProps
 
-class GeoPointMapLayerOptions extends PureComponent<Props> {
-  public render() {
-    const {props} = this
-    const {columns, layer, id} = props
-    const {colorField, colorDimension, colors, isClustered} = layer
-
-    return (
-      <>
-        <Grid.Column className={'markerClustering checkbox'}>
-          <Checkbox
-            label="Enable marker clustering"
-            checked={isClustered === true}
-            onSetChecked={value => {
-              props.onUpdateField(
-                nameOf<GeoPointMapViewLayer>('isClustered'),
-                value,
-                id
-              )
-            }}
-          />
-        </Grid.Column>
-
-        <h5 className="view-options--header">Marker Color</h5>
-        <Form.Element label="Color column">
-          <FieldSelector
-            selectedColumn={colorField}
-            onSelectColumn={field => {
-              props.onUpdateField(
-                nameOf<GeoPointMapViewLayer>('colorField'),
-                field,
-                id
-              )
-            }}
-            availableColumns={columns}
-          />
-        </Form.Element>
-        <label className="cf-form--label">
-          <span>Color thresholds</span>
-        </label>
-        <ThresholdsSettings
-          thresholds={colors}
-          onSetThresholds={colors => {
-            props.onUpdateColors(colors, id)
-          }}
-        />
-        <h5 className="view-options--header color-thresholds-header">Legend</h5>
-        <DimensionValueDisplayProperties
-          dimension={colorDimension}
-          onChange={(property, value) => {
-            props.onUpdateDimensionProperty(
-              id,
-              nameOf<GeoPointMapViewLayer>('colorDimension'),
-              property,
-              value
+const GeoPointMapLayerOptions: FunctionComponent<Props> = props => {
+  const {columns, layer, id} = props
+  const {colorField, colorDimension, colors, isClustered} = layer
+  return (
+    <>
+      <Grid.Column className={'markerClustering checkbox'}>
+        <Checkbox
+          label="Enable marker clustering"
+          checked={isClustered === true}
+          onSetChecked={value => {
+            props.onUpdateField(
+              nameOf<GeoPointMapViewLayer>('isClustered'),
+              value,
+              id
             )
           }}
         />
-      </>
-    )
-  }
+      </Grid.Column>
+
+      <h5 className="view-options--header">Marker Color</h5>
+      <Form.Element label="Color column">
+        <FieldSelector
+          selectedColumn={colorField}
+          onSelectColumn={field => {
+            props.onUpdateField(
+              nameOf<GeoPointMapViewLayer>('colorField'),
+              field,
+              id
+            )
+          }}
+          availableColumns={columns}
+        />
+      </Form.Element>
+      <label className="cf-form--label">
+        <span>Color thresholds</span>
+      </label>
+      <ThresholdsSettings
+        thresholds={colors}
+        onSetThresholds={colors => {
+          props.onUpdateColors(colors, id)
+        }}
+      />
+      <h5 className="view-options--header color-thresholds-header">Legend</h5>
+      <DimensionValueDisplayProperties
+        dimension={colorDimension}
+        onChange={(property, value) => {
+          props.onUpdateDimensionProperty(
+            id,
+            nameOf<GeoPointMapViewLayer>('colorDimension'),
+            property,
+            value
+          )
+        }}
+      />
+    </>
+  )
 }
 
 const mapDispatchToProps: DispatchProps = {

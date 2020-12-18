@@ -1,11 +1,11 @@
 // Libraries
-import React, {PureComponent} from 'react'
+import React, {FunctionComponent} from 'react'
 import {connect} from 'react-redux'
 import {Form, Grid, Input, InputType} from '@influxdata/clockface'
 
 // Components
 import ThresholdsSettings from 'src/shared/components/ThresholdsSettings'
-import DimensionValueDisplayProperties from 'src/shared/visualization/types/Geo/rendering/DimensionValueDisplayProperties'
+import DimensionValueDisplayProperties from 'src/shared/visualization/types/Geo/options/DimensionValueDisplayProperties'
 import FieldSelector from 'src/shared/visualization/types/Geo/options/GeoFieldSelector'
 import Checkbox from 'src/shared/components/Checkbox'
 import AutoDomainInput from 'src/shared/components/AutoDomainInput'
@@ -49,121 +49,122 @@ interface DispatchProps {
 
 type Props = OwnProps & DispatchProps
 
-class GeoCircleLayerOptions extends PureComponent<Props> {
-  public render() {
-    const {props} = this
-    const {columns, layer, id} = props
-    return (
-      <>
-        <h5 className="view-options--header">Circle size</h5>
-        <Form.Element label="Circle radius column">
-          <FieldSelector
-            selectedColumn={layer.radiusField}
-            onSelectColumn={field => {
-              props.onUpdateField(
-                nameOf<GeoCircleViewLayer>('radiusField'),
-                field,
-                id
-              )
-            }}
-            availableColumns={columns}
-          />
-        </Form.Element>
-        <Form.Element label="Maximum circle radius (pixels)">
-          <Input
-            style={{flex: '1 0 0'}}
-            testID={`geo-radius-input`}
-            value={layer.radius}
-            placeholder="Radius in px"
-            min={MIN_CIRCLE_RADIUS}
-            max={MAX_CIRCLE_RADIUS}
-            type={InputType.Number}
-            onChange={e => {
-              props.onUpdateRadius(Number(e.target.value), id)
-            }}
-          />
-        </Form.Element>
-        <AutoDomainInput
-          minLabel={'Value for radius=1'}
-          maxLabel={`Value for radius=${layer.radius}`}
-          domain={parseBounds(layer.radiusDimension.bounds)}
-          onSetDomain={bounds => this.handleSetRadiusDomain(bounds, id)}
-          label="Value to radius mapping"
-        />
+const handleSetRadiusDomain = (
+  props: Props,
+  radiusDomain: [number, number],
+  layer: number
+): void => {
+  let bounds: [string, string] | [null, null]
+  if (radiusDomain) {
+    bounds = [String(radiusDomain[0]), String(radiusDomain[1])]
+  } else {
+    bounds = [null, null]
+  }
+  props.onUpdateDimensionProperty(
+    layer,
+    nameOf<GeoCircleViewLayer>('radiusDimension'),
+    nameOf<Axis>('bounds'),
+    bounds
+  )
+}
 
-        <DimensionValueDisplayProperties
-          dimension={layer.radiusDimension}
-          onChange={(property, value) => {
-            props.onUpdateDimensionProperty(
-              id,
-              nameOf<GeoCircleViewLayer>('radiusDimension'),
-              property,
-              value
+const GeoCircleLayerOptions: FunctionComponent<Props> = props => {
+  const {columns, layer, id} = props
+  return (
+    <>
+      <h5 className="view-options--header">Circle size</h5>
+      <Form.Element label="Circle radius column">
+        <FieldSelector
+          selectedColumn={layer.radiusField}
+          onSelectColumn={field => {
+            props.onUpdateField(
+              nameOf<GeoCircleViewLayer>('radiusField'),
+              field,
+              id
             )
           }}
+          availableColumns={columns}
         />
-
-        <h5 className="view-options--header color-thresholds-header">
-          Circle colors
-        </h5>
-        <Form.Element label="Color column">
-          <FieldSelector
-            selectedColumn={layer.colorField}
-            onSelectColumn={field => {
-              props.onUpdateField(
-                nameOf<GeoCircleViewLayer>('colorField'),
-                field,
-                id
-              )
-            }}
-            availableColumns={columns}
-          />
-        </Form.Element>
-        <label className="cf-form--label">
-          <span>Color thresholds</span>
-        </label>
-        <ThresholdsSettings
-          thresholds={layer.colors}
-          onSetThresholds={colors => {
-            props.onUpdateColors(colors, id)
+      </Form.Element>
+      <Form.Element label="Maximum circle radius (pixels)">
+        <Input
+          style={{flex: '1 0 0'}}
+          testID={`geo-radius-input`}
+          value={layer.radius}
+          placeholder="Radius in px"
+          min={MIN_CIRCLE_RADIUS}
+          max={MAX_CIRCLE_RADIUS}
+          type={InputType.Number}
+          onChange={e => {
+            props.onUpdateRadius(Number(e.target.value), id)
           }}
         />
-        <Grid.Column className={'color-transition checkbox'}>
-          <Checkbox
-            label="Enable fluid color transitions"
-            checked={false}
-            onSetChecked={() => {}}
-          />
-        </Grid.Column>
-        <DimensionValueDisplayProperties
-          dimension={layer.colorDimension}
-          onChange={(property, value) => {
-            props.onUpdateDimensionProperty(
-              id,
-              nameOf<GeoCircleViewLayer>('colorDimension'),
-              property,
-              value
+      </Form.Element>
+      <AutoDomainInput
+        minLabel={'Value for radius=1'}
+        maxLabel={`Value for radius=${layer.radius}`}
+        domain={parseBounds(layer.radiusDimension.bounds)}
+        onSetDomain={bounds => handleSetRadiusDomain(props, bounds, id)}
+        label="Value to radius mapping"
+      />
+
+      <DimensionValueDisplayProperties
+        dimension={layer.radiusDimension}
+        onChange={(property, value) => {
+          props.onUpdateDimensionProperty(
+            id,
+            nameOf<GeoCircleViewLayer>('radiusDimension'),
+            property,
+            value
+          )
+        }}
+      />
+
+      <h5 className="view-options--header color-thresholds-header">
+        Circle colors
+      </h5>
+      <Form.Element label="Color column">
+        <FieldSelector
+          selectedColumn={layer.colorField}
+          onSelectColumn={field => {
+            props.onUpdateField(
+              nameOf<GeoCircleViewLayer>('colorField'),
+              field,
+              id
             )
           }}
+          availableColumns={columns}
         />
-      </>
-    )
-  }
-
-  handleSetRadiusDomain(radiusDomain: [number, number], layer: number): void {
-    let bounds: [string, string] | [null, null]
-    if (radiusDomain) {
-      bounds = [String(radiusDomain[0]), String(radiusDomain[1])]
-    } else {
-      bounds = [null, null]
-    }
-    this.props.onUpdateDimensionProperty(
-      layer,
-      nameOf<GeoCircleViewLayer>('radiusDimension'),
-      nameOf<Axis>('bounds'),
-      bounds
-    )
-  }
+      </Form.Element>
+      <label className="cf-form--label">
+        <span>Color thresholds</span>
+      </label>
+      <ThresholdsSettings
+        thresholds={layer.colors}
+        onSetThresholds={colors => {
+          props.onUpdateColors(colors, id)
+        }}
+      />
+      <Grid.Column className={'color-transition checkbox'}>
+        <Checkbox
+          label="Enable fluid color transitions"
+          checked={false}
+          onSetChecked={() => {}}
+        />
+      </Grid.Column>
+      <DimensionValueDisplayProperties
+        dimension={layer.colorDimension}
+        onChange={(property, value) => {
+          props.onUpdateDimensionProperty(
+            id,
+            nameOf<GeoCircleViewLayer>('colorDimension'),
+            property,
+            value
+          )
+        }}
+      />
+    </>
+  )
 }
 
 const mapDispatchToProps: DispatchProps = {

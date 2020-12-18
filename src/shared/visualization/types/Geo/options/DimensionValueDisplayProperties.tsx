@@ -20,16 +20,17 @@ interface Props {
   onChange: (property: string, value: string) => void
 }
 
-export const DimensionValueDisplayProperties: FunctionComponent<Props> = props => {
+const DimensionValueDisplayProperties: FunctionComponent<Props> = props => {
   const {BASE_2, BASE_10} = AXES_SCALE_OPTIONS
   const {dimension, onChange} = props
+  const dimensionConfiguration = dimension ? dimension : {bounds: [null, null]}
   const onUpdateBase = base => onChange('base', base)
   return (
     <>
       <Form.Element label="Field Label">
         <Input
           type={InputType.Text}
-          value={dimension.label}
+          value={dimensionConfiguration.label}
           onChange={e => onChange('label', e.target.value)}
         />
       </Form.Element>
@@ -39,7 +40,7 @@ export const DimensionValueDisplayProperties: FunctionComponent<Props> = props =
             name="y-values-format"
             id="y-values-format-tab--raw"
             value=""
-            active={dimension.base === ''}
+            active={dimensionConfiguration.base === ''}
             titleText="Do not format values using a unit prefix"
             onClick={onUpdateBase}
           >
@@ -49,7 +50,7 @@ export const DimensionValueDisplayProperties: FunctionComponent<Props> = props =
             name="y-values-format"
             id="y-values-format-tab--kmb"
             value={BASE_10}
-            active={dimension.base === BASE_10}
+            active={dimensionConfiguration.base === BASE_10}
             titleText="Format values using an International System of Units prefix"
             onClick={onUpdateBase}
           >
@@ -59,7 +60,7 @@ export const DimensionValueDisplayProperties: FunctionComponent<Props> = props =
             name="y-values-format"
             id="y-values-format-tab--kmg"
             value={BASE_2}
-            active={dimension.base === BASE_2}
+            active={dimensionConfiguration.base === BASE_2}
             titleText="Format values using a binary unit prefix (for formatting bits or bytes)"
             onClick={onUpdateBase}
           >
@@ -69,13 +70,13 @@ export const DimensionValueDisplayProperties: FunctionComponent<Props> = props =
       </Form.Element>
       <FormElement label={'Value unit prefix'}>
         <Input
-          value={dimension.prefix}
+          value={dimensionConfiguration.prefix}
           onChange={e => onChange('prefix', e.target.value)}
         />
       </FormElement>
       <FormElement label={'Value unit suffix'}>
         <Input
-          value={dimension.suffix}
+          value={dimensionConfiguration.suffix}
           onChange={e => onChange('suffix', e.target.value)}
         />
       </FormElement>
