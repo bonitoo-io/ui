@@ -52,12 +52,14 @@ class GeoChart extends Component<OwnProps & DispatchProps & StateProps, State> {
 
   constructor(props) {
     super(props)
-    const configuration = getTileServerConfigurations()
+    const configuration = getTileServerConfigurations(props.properties.mapStyle)
     this.state = {tileServerConfiguration: configuration}
     if (!configuration) {
-      loadTileServerSecret(this.props.orgID).then(configuration => {
-        this.setState({tileServerConfiguration: configuration})
-      })
+      loadTileServerSecret(props.orgID, props.properties.mapStyle).then(
+        configuration => {
+          this.setState({tileServerConfiguration: configuration})
+        }
+      )
     }
   }
 
@@ -86,7 +88,6 @@ class GeoChart extends Component<OwnProps & DispatchProps & StateProps, State> {
   }
 
   public render() {
-    if (!this.state.tileServerConfiguration) return null
     const {properties, table, isInConfigurationMode} = this.props
     const {
       layers,
@@ -95,6 +96,8 @@ class GeoChart extends Component<OwnProps & DispatchProps & StateProps, State> {
       detectCoordinateFields,
       mapStyle,
     } = properties
+    const tileServerConfiguration = getTileServerConfigurations(mapStyle)
+    if (!tileServerConfiguration) return null
     const {lat, lon} = properties.center
     const {onUpdateQuery, onUpdateViewport} = this
     const config: Config = {
@@ -113,8 +116,8 @@ class GeoChart extends Component<OwnProps & DispatchProps & StateProps, State> {
           onUpdateQuery,
           onUpdateViewport,
           tileServerConfiguration: {
-            tileServerUrl: this.state.tileServerConfiguration.tileServerUrl,
-            bingKey: this.state.tileServerConfiguration.bingKey,
+            tileServerUrl: tileServerConfiguration.tileServerUrl,
+            bingKey: tileServerConfiguration.bingKey,
           },
         },
       ],

@@ -1,5 +1,5 @@
 // Libraries
-import React, {FunctionComponent} from 'react'
+import React, {FunctionComponent, useState} from 'react'
 import {connect} from 'react-redux'
 import {invert} from 'lodash'
 import {
@@ -25,9 +25,9 @@ import {
   GeoCircleViewLayer,
   GeoHeatMapViewLayer,
   GeoPointMapViewLayer,
+  GeoTrackMapViewLayer,
   GeoViewLayer,
   GeoViewLayerProperties,
-  GeoTrackMapViewLayer,
 } from 'src/client'
 
 // Components
@@ -40,15 +40,15 @@ import GeoTrackMapLayerOptions from 'src/shared/visualization/types/Geo/options/
 
 // Actions
 import {
-  setDetectCoordinateFields,
-  setAllowPanAndZoom,
-  setLatitude,
-  setLongitude,
-  setZoom,
-  setField,
   addGeoLayer,
   removeGeoLayer,
+  setAllowPanAndZoom,
+  setDetectCoordinateFields,
+  setField,
+  setLatitude,
+  setLongitude,
   setMapStyle,
+  setZoom,
 } from 'src/shared/visualization/types/Geo/options/geoActions'
 
 // Utils
@@ -56,6 +56,13 @@ import {getVisTable} from 'src/timeMachine/selectors'
 import {nameOf} from 'src/shared/visualization/types/Geo/rendering/utils'
 import {defaultGeoLayer} from 'src/views/helpers'
 import {getColumnNames} from 'src/shared/visualization/types/Geo/options/tableProcessing'
+import {
+  getTileServerConfigurations,
+  loadTileServerSecret,
+  updateTileServerURLWithMapStyle,
+} from '../rendering/tileServer'
+import {MAP_STYLES} from '../rendering/tileServerMapStyles'
+import {getOrg} from '../../../../../organizations/selectors'
 
 const MIN_ZOOM_FACTOR = 0
 const MAX_ZOOM_FACTOR = 28
@@ -66,6 +73,7 @@ const MAX_LATITUDE = 90
 
 interface StateProps {
   columns: string[]
+  orgID: string
 }
 
 interface OwnProps extends GeoViewProperties {}
@@ -91,13 +99,6 @@ const VISUALIZATION_TYPES = {
   'Track map': 'trackMap',
 }
 
-const MAP_STYLES = {
-  Roads: 'roads',
-  Satellite: 'satellite',
-  'Satellite (plain)': 'satellite_plain',
-  Dark: 'dark',
-}
-
 export const GeoOptions: FunctionComponent<Props> = props => {
   const {
     layers,
@@ -108,8 +109,24 @@ export const GeoOptions: FunctionComponent<Props> = props => {
     onRemoveLayer,
     detectCoordinateFields,
     onUpdateDetectCoordinateFields,
+    orgID,
   } = props
-
+  const [tileServerConfiguration, setTileServerConfiguration] = useState(
+    updateTileServerURLWithMapStyle(
+      getTileServerConfigurations(mapStyle),
+      props.mapStyle
+    )
+  )
+  if (!tileServerConfiguration) {
+    loadTileServerSecret(orgID, mapStyle).then(configuration => {
+      setTileServerConfiguration(
+        updateTileServerURLWithMapStyle(configuration, mapStyle)
+      )
+    })
+  }
+  const mapStyles = tileServerConfiguration
+    ? MAP_STYLES[tileServerConfiguration.mapProvider]
+    : null
   const renderLayer = (id: number, layer: GeoViewLayer) => {
     const type = invert(VISUALIZATION_TYPES)[layer.type]
     const {columns} = props
@@ -159,7 +176,6 @@ export const GeoOptions: FunctionComponent<Props> = props => {
       </>
     )
   }
-
   return (
     <>
       <Grid.Column className={'geo-options'}>
@@ -245,15 +261,20 @@ export const GeoOptions: FunctionComponent<Props> = props => {
             </>
           }
         />
-        <Form.Element className={'mapStyle'} label="Map Graphics">
-          <SelectDropdown
-            options={Object.keys(MAP_STYLES)}
-            selectedOption={mapStyle || 'Roads'}
-            onSelect={style => {
-              props.onUpdateMapStyle(style)
-            }}
-          />
-        </Form.Element>
+        {mapStyles && (
+          <Form.Element className={'mapStyle'} label="Map Graphics">
+            <SelectDropdown
+              options={Object.keys(mapStyles.styles)}
+              selectedOption={
+                invert(mapStyles.styles)[mapStyle] ||
+                invert(mapStyles.styles)[mapStyles.default]
+              }
+              onSelect={label => {
+                props.onUpdateMapStyle(mapStyles.styles[label])
+              }}
+            />
+          </Form.Element>
+        )}
         {layers.map((layer, id) => {
           return (
             <div key={id}>
@@ -316,7 +337,11 @@ const mapDispatchToProps: DispatchProps = {
 
 const mapStateToProps = (state: AppState, ownProps: OwnProps) => {
   const {table} = getVisTable(state)
-  return {columns: getColumnNames(table, ownProps.detectCoordinateFields)}
+  const orgID = getOrg(state).id
+  return {
+    orgID,
+    columns: getColumnNames(table, ownProps.detectCoordinateFields),
+  }
 }
 
 export default connect<StateProps, DispatchProps, OwnProps>(
